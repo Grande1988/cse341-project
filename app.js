@@ -1,17 +1,37 @@
-const cors = require('cors') // Place this with other requires (like 'path' and 'express')
+const path = require('path');
 
-const corsOptions = {
-    origin: "https://<your_app_name>.herokuapp.com/",
-    optionsSuccessStatus: 200
-};
-app.use(cors(corsOptions));
+const express = require('express');
+const bodyParser = require('body-parser');
 
-const options = {
-    useUnifiedTopology: true,
-    useNewUrlParser: true,
-    useCreateIndex: true,
-    useFindAndModify: false,
-    family: 4
-};
+const errorController = require('./controllers/error');
+const mongoConnect = require('./util/database');
 
-const MONGODB_URL = process.env.MONGODB_URL || "mongodb+srv://reddgl:Grande!1988@cluster0.sll31.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
+const app = express();
+
+app.set('view engine', 'ejs');
+app.set('views', 'views');
+
+const adminRoutes = require('./routes/admin');
+const shopRoutes = require('./routes/shop');
+
+app.use(bodyParser.urlencoded({ extended: false}));
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.use((req, res, next) => {
+    // User.findById(1)
+    // .then(user => {
+    //   req.user = user;
+    //   next();
+    //  })
+    //  ,catch(err => console.log(err));
+});
+
+//app.use('/admim', adminRoutes);
+//app.use(shopRoutes);
+
+app.use(errorController.get404);
+
+mongoConnect((client) => {
+    console.log(client);
+    app.listen(3000);
+});
